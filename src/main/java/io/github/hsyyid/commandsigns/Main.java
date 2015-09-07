@@ -305,7 +305,6 @@ public class Main
 					if(targetCommandSign != null && player.hasPermission("commandsigns.modify"))
 					{
 						Command targetCommand = null;
-						commandSigns.remove(targetCommandSign);
 
 						for(Command command : commands)
 						{
@@ -315,28 +314,33 @@ public class Main
 							}
 						}
 
-						player.sendMessage(Texts.of(TextColors.GOLD, "[CommadSigns]: ", TextColors.GRAY, "Successfully set new command!"));
-						targetCommandSign.setCommand(targetCommand.getCommand());
-						commandSigns.add(targetCommandSign);
-
-						String json = gson.toJson(commandSigns);
-						try
+						if(targetCommand != null)
 						{
-							// Assume default encoding.
-							FileWriter fileWriter = new FileWriter("CommandSigns.json");
+							commandSigns.remove(targetCommandSign);
+							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
+							targetCommandSign.setCommand(targetCommand.getCommand());
+							commandSigns.add(targetCommandSign);
+							commands.remove(targetCommand);
+							
+							String json = gson.toJson(commandSigns);
+							try
+							{
+								// Assume default encoding.
+								FileWriter fileWriter = new FileWriter("CommandSigns.json");
 
-							// Always wrap FileWriter in BufferedWriter.
-							BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+								// Always wrap FileWriter in BufferedWriter.
+								BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-							bufferedWriter.write(json);
+								bufferedWriter.write(json);
 
-							bufferedWriter.flush();
-							// Always close files.
-							bufferedWriter.close();
-						}
-						catch (IOException ex)
-						{
-							getLogger().error("Could not save JSON file!");
+								bufferedWriter.flush();
+								// Always close files.
+								bufferedWriter.close();
+							}
+							catch (IOException ex)
+							{
+								getLogger().error("Could not save JSON file!");
+							}
 						}
 					}
 
