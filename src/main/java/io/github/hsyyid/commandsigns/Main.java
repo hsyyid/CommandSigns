@@ -56,7 +56,7 @@ public class Main
 	public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
 	public static ArrayList<Command> commands = new ArrayList<Command>();
 	private Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Location.class, new LocationAdapter()).create();
-	
+
 	@Inject
 	private Logger logger;
 
@@ -117,7 +117,7 @@ public class Main
 		{
 			getLogger().error("Could not read JSON file!");
 		}
-		
+
 		CommandSpec setCommandSpec = CommandSpec.builder()
 				.description(Texts.of("Sets Command for a CommandSign"))
 				.permission("commandsigns.setcommand")
@@ -126,7 +126,7 @@ public class Main
 				.build();
 
 		game.getCommandDispatcher().register(this, setCommandSpec, "setcommand");
-		
+
 		getLogger().info("-----------------------------");
 		getLogger().info("CommandSigns was made by HassanS6000!");
 		getLogger().info("Please post all errors on the Sponge Thread or on GitHub!");
@@ -140,7 +140,7 @@ public class Main
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
 	}
-	
+
 	@Listener
 	public void onServerStopping(GameStoppingServerEvent event)
 	{
@@ -164,79 +164,161 @@ public class Main
 			getLogger().error("Could not save JSON file!");
 		}
 	}
-	
+
 	@Listener
-	public void onSignChange(ChangeSignEvent.SourcePlayer event)
+	public void onSignChange(ChangeSignEvent event)
 	{
-		Player player = event.getSourceEntity();
-		Sign sign = event.getTargetTile();
-		Location<World> signLocation = sign.getLocation();
-		SignData signData = event.getText();
-		String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
-
-		commandSigns.add(new CommandSign(signLocation, null));
-		String json = gson.toJson(commandSigns);
-		try
+		if(event.getCause().first(Player.class).isPresent())
 		{
-			// Assume default encoding.
-			FileWriter fileWriter = new FileWriter("CommandSigns.json");
+			Player player = (Player) event.getCause().first(Player.class).get();
+			Sign sign = event.getTargetTile();
+			Location<World> signLocation = sign.getLocation();
+			SignData signData = event.getText();
+			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
 
-			// Always wrap FileWriter in BufferedWriter.
-			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-			bufferedWriter.write(json);
-
-			bufferedWriter.flush();
-			// Always close files.
-			bufferedWriter.close();
-		}
-		catch (IOException ex)
-		{
-			getLogger().error("Could not save JSON file!");
-		}
-		
-		if(line0.equals("[CommandSign]"))
-		{
-			if(player.hasPermission("commandsigns.create"))
+			commandSigns.add(new CommandSign(signLocation, null));
+			String json = gson.toJson(commandSigns);
+			try
 			{
-				signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
-				player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
+				// Assume default encoding.
+				FileWriter fileWriter = new FileWriter("CommandSigns.json");
+
+				// Always wrap FileWriter in BufferedWriter.
+				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+				bufferedWriter.write(json);
+
+				bufferedWriter.flush();
+				// Always close files.
+				bufferedWriter.close();
+			}
+			catch (IOException ex)
+			{
+				getLogger().error("Could not save JSON file!");
+			}
+
+			if(line0.equals("[CommandSign]"))
+			{
+				if(player.hasPermission("commandsigns.create"))
+				{
+					signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
+					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
+				}
 			}
 		}
 	}
 
 	@Listener
-	public void onPlayerBreakBlock(BreakBlockEvent.SourcePlayer event)
+	public void onPlayerBreakBlock(BreakBlockEvent event)
 	{
-		ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
-		
-		for(CommandSign cmdSign : commandSigns)
+		if(event.getCause().first(Player.class).isPresent())
 		{
-			commandSignLocations.add(cmdSign.getLocation());
-		}
+			Player player = (Player) event.getCause().first(Player.class).get();
+			ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
 
-		for(BlockTransaction transaction : event.getTransactions())
-		{
-			if(commandSignLocations.contains(transaction.getFinalReplacement().getLocation().get()))
+			for(CommandSign cmdSign : commandSigns)
 			{
-				if(event.getSourceEntity().hasPermission("commandsigns.destroy"))
+				commandSignLocations.add(cmdSign.getLocation());
+			}
+
+			for(BlockTransaction transaction : event.getTransactions())
+			{
+				if(commandSignLocations.contains(transaction.getFinalReplacement().getLocation().get()))
 				{
-					CommandSign targetCommandSign = null;
-					
-					for(CommandSign cmdSign : commandSigns)
+					if(player.hasPermission("commandsigns.destroy"))
 					{
-						if(cmdSign.getLocation().equals(transaction.getFinalReplacement().getLocation().get()))
+						CommandSign targetCommandSign = null;
+
+						for(CommandSign cmdSign : commandSigns)
 						{
-							targetCommandSign = cmdSign;
-							break;
+							if(cmdSign.getLocation().equals(transaction.getFinalReplacement().getLocation().get()))
+							{
+								targetCommandSign = cmdSign;
+								break;
+							}
+						}
+
+						if(targetCommandSign != null)
+						{
+							commandSigns.remove(targetCommandSign);
+							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
+
+							String json = gson.toJson(commandSigns);
+							try
+							{
+								// Assume default encoding.
+								FileWriter fileWriter = new FileWriter("CommandSigns.json");
+
+								// Always wrap FileWriter in BufferedWriter.
+								BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+								bufferedWriter.write(json);
+
+								bufferedWriter.flush();
+								// Always close files.
+								bufferedWriter.close();
+							}
+							catch (IOException ex)
+							{
+								getLogger().error("Could not save JSON file!");
+							}
 						}
 					}
-					
-					if(targetCommandSign != null)
+					else
 					{
+						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
+						event.setCancelled(true);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	@Listener
+	public void onPlayerInteractBlock(InteractBlockEvent event)
+	{
+		if(event.getCause().first(Player.class).isPresent())
+		{
+			Player player = (Player) event.getCause().first(Player.class).get();
+			if(event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
+			{
+				ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
+
+				for(CommandSign cmdSign : commandSigns)
+				{
+					commandSignLocations.add(cmdSign.getLocation());
+				}
+
+				if(commandSignLocations.contains(event.getTargetBlock().getLocation().get()))
+				{
+					CommandSign targetCommandSign = null;
+
+					for(CommandSign commandSign : commandSigns)
+					{
+						if(commandSign.getLocation().equals(event.getTargetBlock().getLocation()))
+						{
+							targetCommandSign = commandSign;
+						}
+					}
+
+					if(targetCommandSign != null && player.hasPermission("commandsigns.modify"))
+					{
+						Command targetCommand = null;
 						commandSigns.remove(targetCommandSign);
-						event.getSourceEntity().sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
-						
+
+						for(Command command : commands)
+						{
+							if(command.getPlayerUUID().equals(player.getUniqueId()))
+							{
+								targetCommand = command;
+							}
+						}
+
+						player.sendMessage(Texts.of(TextColors.GOLD, "[CommadSigns]: ", TextColors.GRAY, "Successfully set new command!"));
+						targetCommandSign.setCommand(targetCommand.getCommand());
+						commandSigns.add(targetCommandSign);
+
 						String json = gson.toJson(commandSigns);
 						try
 						{
@@ -257,84 +339,13 @@ public class Main
 							getLogger().error("Could not save JSON file!");
 						}
 					}
-				}
-				else
-				{
-					event.getSourceEntity().sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
-					event.setCancelled(true);
-					break;
-				}
-			}
-		}
-	}
 
-	@Listener
-	public void onPlayerInteractBlock(InteractBlockEvent.SourcePlayer event)
-	{
-		if(event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
-		{
-			ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
-
-			for(CommandSign cmdSign : commandSigns)
-			{
-				commandSignLocations.add(cmdSign.getLocation());
-			}
-
-			if(commandSignLocations.contains(event.getTargetLocation()))
-			{
-				CommandSign targetCommandSign = null;
-
-				for(CommandSign commandSign : commandSigns)
-				{
-					if(commandSign.getLocation().equals(event.getTargetLocation()))
+					if(targetCommandSign != null && player.hasPermission("commandsigns.use"))
 					{
-						targetCommandSign = commandSign;
+						String command = targetCommandSign.getCommand();
+						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing command."));
+						game.getCommandDispatcher().process(player, command);
 					}
-				}
-				
-				if(targetCommandSign != null && event.getSourceEntity().hasPermission("commandsigns.modify"))
-				{
-					Command targetCommand = null;
-					commandSigns.remove(targetCommandSign);
-					
-					for(Command command : commands)
-					{
-						if(command.getPlayerUUID().equals(event.getSourceEntity().getUniqueId()))
-						{
-							targetCommand = command;
-						}
-					}
-					
-					event.getSourceEntity().sendMessage(Texts.of(TextColors.GOLD, "[CommadSigns]: ", TextColors.GRAY, "Successfully set new command!"));
-					targetCommandSign.setCommand(targetCommand.getCommand());
-					commandSigns.add(targetCommandSign);
-					
-					String json = gson.toJson(commandSigns);
-					try
-					{
-						// Assume default encoding.
-						FileWriter fileWriter = new FileWriter("CommandSigns.json");
-
-						// Always wrap FileWriter in BufferedWriter.
-						BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-						bufferedWriter.write(json);
-
-						bufferedWriter.flush();
-						// Always close files.
-						bufferedWriter.close();
-					}
-					catch (IOException ex)
-					{
-						getLogger().error("Could not save JSON file!");
-					}
-				}
-				
-				if(targetCommandSign != null && event.getSourceEntity().hasPermission("commandsigns.use"))
-				{
-					String command = targetCommandSign.getCommand();
-					event.getSourceEntity().sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing command."));
-					game.getCommandDispatcher().process(event.getSourceEntity(), command);
 				}
 			}
 		}
