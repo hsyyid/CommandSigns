@@ -3,7 +3,10 @@ apply plugin: 'eclipse'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
-version = '0.1'
+version = '0.2'
+group = "io.github.hsyyid"
+archivesBaseName = "CommandSigns"
+
 jar {
     manifest {
         attributes 'Implementation-Title': 'CommandSigns',

@@ -47,7 +47,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.1")
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.2")
 public class Main
 {
 	public static Game game = null;
@@ -347,6 +347,7 @@ public class Main
 					if(targetCommandSign != null && player.hasPermission("commandsigns.use"))
 					{
 						String command = targetCommandSign.getCommand();
+						command = command.replaceAll("@p", player.getName());
 						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing command."));
 						game.getCommandDispatcher().process(player, command);
 					}
