@@ -3,7 +3,6 @@ package io.github.hsyyid.commandsigns;
 import io.github.hsyyid.commandsigns.cmdexecutors.SetCommandExecutor;
 import io.github.hsyyid.commandsigns.utils.Command;
 import io.github.hsyyid.commandsigns.utils.CommandSign;
-import io.github.hsyyid.commandsigns.utils.LocationAdapter;
 import io.github.hsyyid.commandsigns.utils.Utils;
 
 import java.io.File;
@@ -37,8 +36,6 @@ import org.spongepowered.api.util.command.spec.CommandSpec;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
 @Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.2")
@@ -49,7 +46,6 @@ public class Main
 	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
 	public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
 	public static ArrayList<Command> commands = new ArrayList<Command>();
-	public static Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Location.class, new LocationAdapter()).create();
 
 	@Inject
 	private Logger logger;
@@ -92,7 +88,7 @@ public class Main
 			getLogger().error("The default configuration could not be loaded or created!");
 		}
 
-		Utils.readCommandSignsFromJson();
+		Utils.readCommandSigns();
 
 		CommandSpec setCommandSpec = CommandSpec.builder()
 				.description(Texts.of("Sets Command for a CommandSign"))
@@ -114,7 +110,7 @@ public class Main
 	@Listener
 	public void onServerStopping(GameStoppingServerEvent event)
 	{
-		Utils.writeCommandSignsToJson();
+		Utils.writeCommandSigns();
 	}
 
 	@Listener
@@ -129,7 +125,7 @@ public class Main
 			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
 
 			commandSigns.add(new CommandSign(signLocation, null));
-			Utils.writeCommandSignsToJson();
+			Utils.writeCommandSigns();
 
 			if(line0.equals("[CommandSign]"))
 			{
@@ -177,7 +173,7 @@ public class Main
 							commandSigns.remove(targetCommandSign);
 							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
 
-							Utils.writeCommandSignsToJson();
+							Utils.writeCommandSigns();
 						}
 					}
 					else
@@ -197,28 +193,22 @@ public class Main
 		if(event.getCause().first(Player.class).isPresent())
 		{
 			Player player = (Player) event.getCause().first(Player.class).get();
+
 			if(event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
 			{
-				ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
+			    CommandSign targetCommandSign = null;
 
 				for(CommandSign cmdSign : commandSigns)
 				{
-					commandSignLocations.add(cmdSign.getLocation());
+					if(cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ())
+					{
+					   targetCommandSign = cmdSign;
+					}
 				}
 
-				if(commandSignLocations.contains(event.getTargetBlock().getLocation().get()))
-				{
-					CommandSign targetCommandSign = null;
-
-					for(CommandSign commandSign : commandSigns)
-					{
-						if(commandSign.getLocation().equals(event.getTargetBlock().getLocation()))
-						{
-							targetCommandSign = commandSign;
-						}
-					}
-
-					if(targetCommandSign != null && player.hasPermission("commandsigns.modify"))
+				if(targetCommandSign != null)
+				{   
+					if(player.hasPermission("commandsigns.modify"))
 					{
 						Command targetCommand = null;
 
@@ -227,9 +217,10 @@ public class Main
 							if(command.getPlayerUUID().equals(player.getUniqueId()))
 							{
 								targetCommand = command;
+								break;
 							}
 						}
-
+						
 						if(targetCommand != null)
 						{
 							commandSigns.remove(targetCommandSign);
@@ -238,7 +229,7 @@ public class Main
 							commandSigns.add(targetCommandSign);
 							commands.remove(targetCommand);
 							
-							Utils.writeCommandSignsToJson();
+							Utils.writeCommandSigns();
 						}
 					}
 
