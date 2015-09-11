@@ -4,17 +4,11 @@ import io.github.hsyyid.commandsigns.cmdexecutors.SetCommandExecutor;
 import io.github.hsyyid.commandsigns.utils.Command;
 import io.github.hsyyid.commandsigns.utils.CommandSign;
 import io.github.hsyyid.commandsigns.utils.LocationAdapter;
+import io.github.hsyyid.commandsigns.utils.Utils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -55,7 +49,7 @@ public class Main
 	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
 	public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
 	public static ArrayList<Command> commands = new ArrayList<Command>();
-	private Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Location.class, new LocationAdapter()).create();
+	public static Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Location.class, new LocationAdapter()).create();
 
 	@Inject
 	private Logger logger;
@@ -98,25 +92,7 @@ public class Main
 			getLogger().error("The default configuration could not be loaded or created!");
 		}
 
-		String json = null;
-
-		try
-		{
-			json = readFile("CommandSigns.json", StandardCharsets.UTF_8);
-		}
-		catch (IOException e)
-		{
-			getLogger().error("Could not read JSON file!");
-		}
-
-		if(json != null)
-		{
-			commandSigns = new ArrayList<CommandSign>(Arrays.asList(gson.fromJson(json, CommandSign[].class)));
-		}
-		else
-		{
-			getLogger().error("Could not read JSON file!");
-		}
+		Utils.readCommandSignsFromJson();
 
 		CommandSpec setCommandSpec = CommandSpec.builder()
 				.description(Texts.of("Sets Command for a CommandSign"))
@@ -135,34 +111,10 @@ public class Main
 		getLogger().info("CommandSigns loaded!");
 	}
 
-	static String readFile(String path, Charset encoding) throws IOException
-	{
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
-	}
-
 	@Listener
 	public void onServerStopping(GameStoppingServerEvent event)
 	{
-		String json = gson.toJson(commandSigns);
-		try
-		{
-			// Assume default encoding.
-			FileWriter fileWriter = new FileWriter("CommandSigns.json");
-
-			// Always wrap FileWriter in BufferedWriter.
-			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-			bufferedWriter.write(json);
-
-			bufferedWriter.flush();
-			// Always close files.
-			bufferedWriter.close();
-		}
-		catch (IOException ex)
-		{
-			getLogger().error("Could not save JSON file!");
-		}
+		Utils.writeCommandSignsToJson();
 	}
 
 	@Listener
@@ -177,25 +129,7 @@ public class Main
 			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
 
 			commandSigns.add(new CommandSign(signLocation, null));
-			String json = gson.toJson(commandSigns);
-			try
-			{
-				// Assume default encoding.
-				FileWriter fileWriter = new FileWriter("CommandSigns.json");
-
-				// Always wrap FileWriter in BufferedWriter.
-				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-				bufferedWriter.write(json);
-
-				bufferedWriter.flush();
-				// Always close files.
-				bufferedWriter.close();
-			}
-			catch (IOException ex)
-			{
-				getLogger().error("Could not save JSON file!");
-			}
+			Utils.writeCommandSignsToJson();
 
 			if(line0.equals("[CommandSign]"))
 			{
@@ -243,25 +177,7 @@ public class Main
 							commandSigns.remove(targetCommandSign);
 							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
 
-							String json = gson.toJson(commandSigns);
-							try
-							{
-								// Assume default encoding.
-								FileWriter fileWriter = new FileWriter("CommandSigns.json");
-
-								// Always wrap FileWriter in BufferedWriter.
-								BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-								bufferedWriter.write(json);
-
-								bufferedWriter.flush();
-								// Always close files.
-								bufferedWriter.close();
-							}
-							catch (IOException ex)
-							{
-								getLogger().error("Could not save JSON file!");
-							}
+							Utils.writeCommandSignsToJson();
 						}
 					}
 					else
@@ -322,25 +238,7 @@ public class Main
 							commandSigns.add(targetCommandSign);
 							commands.remove(targetCommand);
 							
-							String json = gson.toJson(commandSigns);
-							try
-							{
-								// Assume default encoding.
-								FileWriter fileWriter = new FileWriter("CommandSigns.json");
-
-								// Always wrap FileWriter in BufferedWriter.
-								BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-								bufferedWriter.write(json);
-
-								bufferedWriter.flush();
-								// Always close files.
-								bufferedWriter.close();
-							}
-							catch (IOException ex)
-							{
-								getLogger().error("Could not save JSON file!");
-							}
+							Utils.writeCommandSignsToJson();
 						}
 					}
 
