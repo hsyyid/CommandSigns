@@ -14,17 +14,15 @@ import org.spongepowered.api.util.command.source.CommandBlockSource;
 import org.spongepowered.api.util.command.source.ConsoleSource;
 import org.spongepowered.api.util.command.spec.CommandExecutor;
 
-public class SetCommandExecutor implements CommandExecutor
+public class AddCommandExecutor implements CommandExecutor
 {
     public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException
     {
-        int commandNumber = ctx.<Integer>getOne("command number").get();
         String command = ctx.<String>getOne("command").get();
-
         if (src instanceof Player)
         {
             Player player = (Player) src;
-            Main.commands.add(new Command(command, commandNumber, player.getUniqueId(), false));
+            Main.commands.add(new Command(command, player.getUniqueId(), false));
             player.sendMessage(Texts.of(TextColors.DARK_RED, "[CommandSigns]: ", TextColors.GOLD, "Right click a CommandSign!"));
         }
         else if (src instanceof ConsoleSource)

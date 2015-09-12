@@ -7,14 +7,20 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 public class Utils
 {
+    private static Gson gson = new GsonBuilder().create();
+    
     public static void writeCommandSigns()
     {
         Connection c = null;
@@ -43,10 +49,10 @@ public class Utils
                 double z = commandSign.getLocation().getZ();
 
                 String worldUUID = commandSign.getLocation().getExtent().getUniqueId().toString();
-                String command = commandSign.getCommand();
+                String commandJSON = gson.toJson(commandSign.getCommands());
 
                 sql = "INSERT INTO COMMANDSIGNS (X,Y,Z,WORLDID,COMMAND) " +
-                        "VALUES (" + x + "," + y + "," + z + ",'" + worldUUID + "','" + command + "');"; 
+                        "VALUES (" + x + "," + y + "," + z + ",'" + worldUUID + "','" + commandJSON + "');"; 
                 stmt.executeUpdate(sql);
             }
 
@@ -79,12 +85,13 @@ public class Utils
                 double y = rs.getDouble("y");
                 double z = rs.getDouble("z");
                 String worldUUID = rs.getString("worldid");
-                String command = rs.getString("command");
-
+                String commandJSON = rs.getString("command");
+                ArrayList<String> commands = new ArrayList<String>(Arrays.asList(gson.fromJson(commandJSON, String[].class)));
                 World world = Main.game.getServer().getWorld(UUID.fromString(worldUUID)).get();
                 Location<World> location = new Location<World>(world, x, y, z);
 
-                CommandSign commandSign = new CommandSign(location, command);
+                CommandSign commandSign = new CommandSign(location);
+                commandSign.setCommands(commands);
                 commandSigns.add(commandSign);
             }
 
