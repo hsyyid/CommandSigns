@@ -41,273 +41,268 @@ import org.spongepowered.api.world.World;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.3")
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.4")
 public class Main
 {
-    public static Game game = null;
-    public static ConfigurationNode config = null;
-    public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
-    public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
-    public static ArrayList<Command> commands = new ArrayList<Command>();
+	public static Game game = null;
+	public static ConfigurationNode config = null;
+	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
+	public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
+	public static ArrayList<Command> commands = new ArrayList<Command>();
 
-    @Inject
-    private Logger logger;
+	@Inject
+	private Logger logger;
 
-    public Logger getLogger()
-    {
-        return logger;
-    }
+	public Logger getLogger()
+	{
+		return logger;
+	}
 
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private File dConfig;
+	@Inject
+	@DefaultConfig(sharedRoot = true)
+	private File dConfig;
 
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> confManager;
+	@Inject
+	@DefaultConfig(sharedRoot = true)
+	private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
-    @Listener
-    public void onServerStart(GameStartedServerEvent event)
-    {
-        getLogger().info("CommandSigns loading...");
+	@Listener
+	public void onServerStart(GameStartedServerEvent event)
+	{
+		getLogger().info("CommandSigns loading...");
 
-        game = event.getGame();
+		game = event.getGame();
 
-        // Config File
-        try
-        {
-            if (!dConfig.exists())
-            {
-                dConfig.createNewFile();
-                config = confManager.load();
-                confManager.save(config);
-            }
-            configurationManager = confManager;
-            config = confManager.load();
+		// Config File
+		try
+		{
+			if (!dConfig.exists())
+			{
+				dConfig.createNewFile();
+				config = confManager.load();
+				confManager.save(config);
+			}
+			configurationManager = confManager;
+			config = confManager.load();
 
-        }
-        catch (IOException exception)
-        {
-            getLogger().error("The default configuration could not be loaded or created!");
-        }
+		}
+		catch (IOException exception)
+		{
+			getLogger().error("The default configuration could not be loaded or created!");
+		}
 
-        Utils.readCommandSigns();
+		Utils.readCommandSigns();
 
-        CommandSpec addCommandSpec = CommandSpec.builder()
-                .description(Texts.of("Adds Command to CommandSign"))
-                .permission("commandsigns.addcommand")
-                .arguments(GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Texts.of("command"))))
-                .executor(new AddCommandExecutor())
-                .build();
+		CommandSpec addCommandSpec = CommandSpec.builder()
+			.description(Texts.of("Adds Command to CommandSign"))
+			.permission("commandsigns.addcommand")
+			.arguments(GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Texts.of("command"))))
+			.executor(new AddCommandExecutor())
+			.build();
 
-        game.getCommandDispatcher().register(this, addCommandSpec, "addcommand");
+		game.getCommandDispatcher().register(this, addCommandSpec, "addcommand");
 
-        CommandSpec setCommandSpec = CommandSpec.builder()
-                .description(Texts.of("Sets Command on CommandSign"))
-                .permission("commandsigns.setcommand")
-                .arguments(GenericArguments.seq(
-                        GenericArguments.onlyOne(GenericArguments.integer(Texts.of("command number"))),
-                        GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Texts.of("command")))))
-                        .executor(new SetCommandExecutor())
-                        .build();
+		CommandSpec setCommandSpec = CommandSpec.builder()
+			.description(Texts.of("Sets Command on CommandSign"))
+			.permission("commandsigns.setcommand")
+			.arguments(GenericArguments.seq(
+				GenericArguments.onlyOne(GenericArguments.integer(Texts.of("command number"))),
+				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Texts.of("command")))))
+			.executor(new SetCommandExecutor())
+			.build();
 
-        game.getCommandDispatcher().register(this, setCommandSpec, "setcommand");
+		game.getCommandDispatcher().register(this, setCommandSpec, "setcommand");
 
-        CommandSpec removeCommandSpec = CommandSpec.builder()
-                .description(Texts.of("Removes Command on CommandSign"))
-                .permission("commandsigns.removecommand")
-                .arguments( GenericArguments.onlyOne(GenericArguments.integer(Texts.of("command number"))))
-                .executor(new RemoveCommandExecutor())
-                .build();
+		CommandSpec removeCommandSpec = CommandSpec.builder()
+			.description(Texts.of("Removes Command on CommandSign"))
+			.permission("commandsigns.removecommand")
+			.arguments(GenericArguments.onlyOne(GenericArguments.integer(Texts.of("command number"))))
+			.executor(new RemoveCommandExecutor())
+			.build();
 
-        game.getCommandDispatcher().register(this, removeCommandSpec, "removecommand");
+		game.getCommandDispatcher().register(this, removeCommandSpec, "removecommand");
 
-        getLogger().info("-----------------------------");
-        getLogger().info("CommandSigns was made by HassanS6000!");
-        getLogger().info("Please post all errors on the Sponge Thread or on GitHub!");
-        getLogger().info("Have fun, and enjoy! :D");
-        getLogger().info("-----------------------------");
-        getLogger().info("CommandSigns loaded!");
-    }
+		getLogger().info("-----------------------------");
+		getLogger().info("CommandSigns was made by HassanS6000!");
+		getLogger().info("Please post all errors on the Sponge Thread or on GitHub!");
+		getLogger().info("Have fun, and enjoy! :D");
+		getLogger().info("-----------------------------");
+		getLogger().info("CommandSigns loaded!");
+	}
 
-    @Listener
-    public void onServerStopping(GameStoppingServerEvent event)
-    {
-        Utils.writeCommandSigns();
-    }
+	@Listener
+	public void onServerStopping(GameStoppingServerEvent event)
+	{
+		Utils.writeCommandSigns();
+	}
 
-    @Listener
-    public void onSignChange(ChangeSignEvent event)
-    {
-        if(event.getCause().first(Player.class).isPresent())
-        {
-            Player player = (Player) event.getCause().first(Player.class).get();
-            Sign sign = event.getTargetTile();
-            Location<World> signLocation = sign.getLocation();
-            SignData signData = event.getText();
-            String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
+	@Listener
+	public void onSignChange(ChangeSignEvent event)
+	{
+		if (event.getCause().first(Player.class).isPresent())
+		{
+			Player player = (Player) event.getCause().first(Player.class).get();
+			Sign sign = event.getTargetTile();
+			Location<World> signLocation = sign.getLocation();
+			SignData signData = event.getText();
+			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
 
-            commandSigns.add(new CommandSign(signLocation));
-            Utils.writeCommandSigns();
+			commandSigns.add(new CommandSign(signLocation));
+			Utils.writeCommandSigns();
 
-            if(line0.equals("[CommandSign]"))
-            {
-                if(player.hasPermission("commandsigns.create"))
-                {
-                    signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
-                    player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
-                }
-            }
-        }
-    }
+			if (line0.equals("[CommandSign]"))
+			{
+				if (player.hasPermission("commandsigns.create"))
+				{
+					signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
+					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
+				}
+			}
+		}
+	}
 
-    @Listener
-    public void onPlayerBreakBlock(BreakBlockEvent event)
-    {
-        if(event.getCause().first(Player.class).isPresent())
-        {
-            Player player = (Player) event.getCause().first(Player.class).get();
-            ArrayList<Location<World>> commandSignLocations = new ArrayList<Location<World>>();
+	@Listener
+	public void onPlayerBreakBlock(BreakBlockEvent event)
+	{
+		if (event.getCause().first(Player.class).isPresent())
+		{
+			Player player = (Player) event.getCause().first(Player.class).get();
 
-            for(CommandSign cmdSign : commandSigns)
-            {
-                commandSignLocations.add(cmdSign.getLocation());
-            }
+			for (BlockTransaction transaction : event.getTransactions())
+			{
 
-            for(BlockTransaction transaction : event.getTransactions())
-            {
-                if(commandSignLocations.contains(transaction.getFinalReplacement().getLocation().get()))
-                {
-                    if(player.hasPermission("commandsigns.destroy"))
-                    {
-                        CommandSign targetCommandSign = null;
+				if (player.hasPermission("commandsigns.destroy"))
+				{
+					CommandSign targetCommandSign = null;
 
-                        for(CommandSign cmdSign : commandSigns)
-                        {
-                            if(cmdSign.getLocation().equals(transaction.getFinalReplacement().getLocation().get()))
-                            {
-                                targetCommandSign = cmdSign;
-                                break;
-                            }
-                        }
+					for (CommandSign cmdSign : commandSigns)
+					{
+						if (cmdSign.getLocation().getX() == transaction.getFinalReplacement().getLocation().get().getX() && 
+							cmdSign.getLocation().getY() == transaction.getFinalReplacement().getLocation().get().getY() &&
+							cmdSign.getLocation().getZ() == transaction.getFinalReplacement().getLocation().get().getZ() &&
+							cmdSign.getLocation().getExtent().getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
+						{
+							targetCommandSign = cmdSign;
+							break;
+						}
+					}
 
-                        if(targetCommandSign != null)
-                        {
-                            commandSigns.remove(targetCommandSign);
-                            player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
+					if (targetCommandSign != null)
+					{
+						commandSigns.remove(targetCommandSign);
+						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
 
-                            Utils.writeCommandSigns();
-                        }
-                    }
-                    else
-                    {
-                        player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
-                        event.setCancelled(true);
-                        break;
-                    }
-                }
-            }
-        }
-    }
+						Utils.writeCommandSigns();
+					}
+				}
+				else
+				{
+					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
+					event.setCancelled(true);
+					break;
+				}
+			}
+		}
+	}
 
-    @Listener
-    public void onPlayerInteractBlock(InteractBlockEvent event)
-    {
-        if(event.getCause().first(Player.class).isPresent())
-        {
-            Player player = (Player) event.getCause().first(Player.class).get();
+	@Listener
+	public void onPlayerInteractBlock(InteractBlockEvent event)
+	{
+		if (event.getCause().first(Player.class).isPresent())
+		{
+			Player player = (Player) event.getCause().first(Player.class).get();
 
-            if(event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
-            {
-                CommandSign targetCommandSign = null;
+			if (event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
+			{
+				CommandSign targetCommandSign = null;
 
-                for(CommandSign cmdSign : commandSigns)
-                {
-                    if(cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ())
-                    {
-                        targetCommandSign = cmdSign;
-                    }
-                }
+				for (CommandSign cmdSign : commandSigns)
+				{
+					if (cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ())
+					{
+						targetCommandSign = cmdSign;
+					}
+				}
 
-                if(targetCommandSign != null)
-                {   
-                    if(player.hasPermission("commandsigns.modify"))
-                    {
-                        Command targetCommand = null;
+				if (targetCommandSign != null)
+				{
+					if (player.hasPermission("commandsigns.modify"))
+					{
+						Command targetCommand = null;
 
-                        for(Command command : commands)
-                        {
-                            if(command.getPlayerUUID().equals(player.getUniqueId()))
-                            {
-                                targetCommand = command;
-                                break;
-                            }
-                        }
+						for (Command command : commands)
+						{
+							if (command.getPlayerUUID().equals(player.getUniqueId()))
+							{
+								targetCommand = command;
+								break;
+							}
+						}
 
-                        if(targetCommand != null && targetCommand.getCommand() != null && !(targetCommand.getToRemove()))
-                        {
-                            commandSigns.remove(targetCommandSign);
+						if (targetCommand != null && targetCommand.getCommand() != null && !(targetCommand.getToRemove()))
+						{
+							commandSigns.remove(targetCommandSign);
 
-                            if(targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer>absent())
-                            {
-                                player.sendMessage(targetCommandSign.addCommand(targetCommand.getCommand(), targetCommand.getCommandNumber().get() - 1));
-                            }
-                            else
-                            {
-                                targetCommandSign.addCommand(targetCommand.getCommand());
-                                player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
-                                getLogger().info("At line 260");
-                            }
+							if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
+							{
+								player.sendMessage(targetCommandSign.addCommand(targetCommand.getCommand(), targetCommand.getCommandNumber().get() - 1));
+							}
+							else
+							{
+								targetCommandSign.addCommand(targetCommand.getCommand());
+								player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
+								getLogger().info("At line 260");
+							}
 
-                            commandSigns.add(targetCommandSign);
-                            commands.remove(targetCommand);
+							commandSigns.add(targetCommandSign);
+							commands.remove(targetCommand);
 
-                            Utils.writeCommandSigns();
-                        }
-                        else if(targetCommand != null && targetCommand.getToRemove())
-                        {
-                            commandSigns.remove(targetCommandSign);
+							Utils.writeCommandSigns();
+						}
+						else if (targetCommand != null && targetCommand.getToRemove())
+						{
+							commandSigns.remove(targetCommandSign);
 
-                            if(targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer>absent())
-                            {
-                                player.sendMessage(targetCommandSign.removeCommand(targetCommand.getCommandNumber().get() - 1));
-                                getLogger().info("At line 275");
-                            }
+							if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
+							{
+								player.sendMessage(targetCommandSign.removeCommand(targetCommand.getCommandNumber().get() - 1));
+								getLogger().info("At line 275");
+							}
 
-                            commandSigns.add(targetCommandSign);
-                            commands.remove(targetCommand);
+							commandSigns.add(targetCommandSign);
+							commands.remove(targetCommand);
 
-                            Utils.writeCommandSigns();
-                            getLogger().info("At line 282");
-                        }
-                    }
+							Utils.writeCommandSigns();
+							getLogger().info("At line 282");
+						}
+					}
 
-                    if(targetCommandSign != null && player.hasPermission("commandsigns.use"))
-                    {
-                        ArrayList<String> commands = targetCommandSign.getCommands();
-                        
-                        if(commands.size() > 0)
-                        {
-                            player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
-                        }
-                        else
-                        {
-                            player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
-                        }
-                        
-                        for(String command : commands)
-                        {
-                            command = command.replaceAll("@p", player.getName());
-                            game.getCommandDispatcher().process(player, command);
-                        }
-                    }
-                }
-            }
-        }
-    }
+					if (targetCommandSign != null && player.hasPermission("commandsigns.use"))
+					{
+						ArrayList<String> commands = targetCommandSign.getCommands();
 
-    public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
-    {
-        return configurationManager;
-    }
+						if (commands.size() > 0)
+						{
+							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
+						}
+						else
+						{
+							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
+						}
+
+						for (String command : commands)
+						{
+							command = command.replaceAll("@p", player.getName());
+							game.getCommandDispatcher().process(player, command);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public static ConfigurationLoader<CommentedConfigurationNode> getConfigManager()
+	{
+		return configurationManager;
+	}
 }
