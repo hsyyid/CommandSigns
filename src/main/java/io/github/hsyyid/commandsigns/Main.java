@@ -1,20 +1,16 @@
 package io.github.hsyyid.commandsigns;
 
+import com.google.common.base.Optional;
+import com.google.inject.Inject;
 import io.github.hsyyid.commandsigns.cmdexecutors.AddCommandExecutor;
 import io.github.hsyyid.commandsigns.cmdexecutors.RemoveCommandExecutor;
 import io.github.hsyyid.commandsigns.cmdexecutors.SetCommandExecutor;
 import io.github.hsyyid.commandsigns.utils.Command;
 import io.github.hsyyid.commandsigns.utils.CommandSign;
 import io.github.hsyyid.commandsigns.utils.Utils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockTransaction;
@@ -24,7 +20,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.block.BreakBlockEvent;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
@@ -38,8 +34,9 @@ import org.spongepowered.api.util.command.spec.CommandSpec;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 @Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.4")
 public class Main
@@ -162,7 +159,7 @@ public class Main
 	}
 
 	@Listener
-	public void onPlayerBreakBlock(BreakBlockEvent event)
+	public void onPlayerBreakBlock(ChangeBlockEvent.Break event)
 	{
 		if (event.getCause().first(Player.class).isPresent())
 		{
