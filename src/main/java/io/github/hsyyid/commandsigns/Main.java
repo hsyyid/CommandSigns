@@ -13,9 +13,10 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.block.BlockTransaction;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Sign;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.living.player.Player;
@@ -23,7 +24,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.config.DefaultConfig;
@@ -38,7 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.4")
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.5")
 public class Main
 {
 	public static Game game = null;
@@ -64,7 +65,7 @@ public class Main
 	private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
 	@Listener
-	public void onServerStart(GameStartedServerEvent event)
+	public void onServerStart(GameInitializationEvent event)
 	{
 		getLogger().info("CommandSigns loading...");
 
@@ -165,7 +166,7 @@ public class Main
 		{
 			Player player = (Player) event.getCause().first(Player.class).get();
 
-			for (BlockTransaction transaction : event.getTransactions())
+			for (Transaction<BlockSnapshot> transaction : event.getTransactions())
 			{
 
 				if (player.hasPermission("commandsigns.destroy"))
@@ -174,9 +175,9 @@ public class Main
 
 					for (CommandSign cmdSign : commandSigns)
 					{
-						if (cmdSign.getLocation().getX() == transaction.getFinalReplacement().getLocation().get().getX() && 
-							cmdSign.getLocation().getY() == transaction.getFinalReplacement().getLocation().get().getY() &&
-							cmdSign.getLocation().getZ() == transaction.getFinalReplacement().getLocation().get().getZ() &&
+						if (cmdSign.getLocation().getX() == transaction.getFinal().getLocation().get().getX() && 
+							cmdSign.getLocation().getY() == transaction.getFinal().getLocation().get().getY() &&
+							cmdSign.getLocation().getZ() == transaction.getFinal().getLocation().get().getZ() &&
 							cmdSign.getLocation().getExtent().getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
 						{
 							targetCommandSign = cmdSign;
