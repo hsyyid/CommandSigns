@@ -168,36 +168,34 @@ public class Main
 
 			for (Transaction<BlockSnapshot> transaction : event.getTransactions())
 			{
+				CommandSign targetCommandSign = null;
 
-				if (player.hasPermission("commandsigns.destroy"))
+				for (CommandSign cmdSign : commandSigns)
 				{
-					CommandSign targetCommandSign = null;
-
-					for (CommandSign cmdSign : commandSigns)
+					if (cmdSign.getLocation().getX() == transaction.getFinal().getLocation().get().getX() &&
+						cmdSign.getLocation().getY() == transaction.getFinal().getLocation().get().getY() &&
+						cmdSign.getLocation().getZ() == transaction.getFinal().getLocation().get().getZ() &&
+						cmdSign.getLocation().getExtent().getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
 					{
-						if (cmdSign.getLocation().getX() == transaction.getFinal().getLocation().get().getX() && 
-							cmdSign.getLocation().getY() == transaction.getFinal().getLocation().get().getY() &&
-							cmdSign.getLocation().getZ() == transaction.getFinal().getLocation().get().getZ() &&
-							cmdSign.getLocation().getExtent().getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
-						{
-							targetCommandSign = cmdSign;
-							break;
-						}
+						targetCommandSign = cmdSign;
+						break;
 					}
+				}
 
-					if (targetCommandSign != null)
+				if (targetCommandSign != null)
+				{
+					if (player.hasPermission("commandsigns.destroy"))
 					{
 						commandSigns.remove(targetCommandSign);
 						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
-
 						Utils.writeCommandSigns();
 					}
-				}
-				else
-				{
-					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
-					event.setCancelled(true);
-					break;
+					else
+					{
+						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
+						event.setCancelled(true);
+						break;
+					}
 				}
 			}
 		}
@@ -249,7 +247,6 @@ public class Main
 							{
 								targetCommandSign.addCommand(targetCommand.getCommand());
 								player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
-								getLogger().info("At line 260");
 							}
 
 							commandSigns.add(targetCommandSign);
@@ -264,14 +261,12 @@ public class Main
 							if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
 							{
 								player.sendMessage(targetCommandSign.removeCommand(targetCommand.getCommandNumber().get() - 1));
-								getLogger().info("At line 275");
 							}
 
 							commandSigns.add(targetCommandSign);
 							commands.remove(targetCommand);
 
 							Utils.writeCommandSigns();
-							getLogger().info("At line 282");
 						}
 					}
 
