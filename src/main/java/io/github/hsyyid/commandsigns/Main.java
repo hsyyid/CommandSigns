@@ -145,15 +145,14 @@ public class Main
 			SignData signData = event.getText();
 			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
 
-			commandSigns.add(new CommandSign(signLocation));
-			Utils.writeCommandSigns();
-
 			if (line0.equals("[CommandSign]"))
 			{
 				if (player.hasPermission("commandsigns.create"))
 				{
 					signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
 					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
+					commandSigns.add(new CommandSign(signLocation));
+					Utils.writeCommandSigns();
 				}
 			}
 		}
@@ -214,9 +213,11 @@ public class Main
 
 				for (CommandSign cmdSign : commandSigns)
 				{
-					if (cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ())
+					if (cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ()
+						&& cmdSign.getLocation().getExtent().getUniqueId().toString().equals(event.getTargetBlock().getLocation().get().getExtent().getUniqueId().toString()))
 					{
 						targetCommandSign = cmdSign;
+						break;
 					}
 				}
 
@@ -270,7 +271,7 @@ public class Main
 						}
 					}
 
-					if (targetCommandSign != null && player.hasPermission("commandsigns.use"))
+					if (player.hasPermission("commandsigns.use"))
 					{
 						ArrayList<String> commands = targetCommandSign.getCommands();
 
