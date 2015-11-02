@@ -25,6 +25,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.config.DefaultConfig;
@@ -39,7 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.5")
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.6")
 public class Main
 {
 	public static Game game = null;
@@ -65,7 +66,7 @@ public class Main
 	private ConfigurationLoader<CommentedConfigurationNode> confManager;
 
 	@Listener
-	public void onServerStart(GameInitializationEvent event)
+	public void onServerInit(GameInitializationEvent event)
 	{
 		getLogger().info("CommandSigns loading...");
 
@@ -88,8 +89,6 @@ public class Main
 		{
 			getLogger().error("The default configuration could not be loaded or created!");
 		}
-
-		Utils.readCommandSigns();
 
 		CommandSpec addCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Adds Command to CommandSign"))
@@ -127,7 +126,13 @@ public class Main
 		getLogger().info("-----------------------------");
 		getLogger().info("CommandSigns loaded!");
 	}
-
+	
+	@Listener
+	public void onServerStart(GameStartingServerEvent event)
+	{
+		Utils.readCommandSigns();
+	}
+	
 	@Listener
 	public void onServerStopping(GameStoppingServerEvent event)
 	{
