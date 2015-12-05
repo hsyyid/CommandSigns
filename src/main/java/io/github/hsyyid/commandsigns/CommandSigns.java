@@ -16,6 +16,9 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Sign;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -28,11 +31,8 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.service.config.DefaultConfig;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.command.args.GenericArguments;
-import org.spongepowered.api.util.command.spec.CommandSpec;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -40,8 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.6")
-public class Main
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.8")
+public class CommandSigns
 {
 	public static Game game = null;
 	public static ConfigurationNode config = null;
@@ -97,7 +97,7 @@ public class Main
 			.executor(new AddCommandExecutor())
 			.build();
 
-		game.getCommandDispatcher().register(this, addCommandSpec, "addcommand");
+		game.getCommandManager().register(this, addCommandSpec, "addcommand");
 
 		CommandSpec setCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Sets Command on CommandSign"))
@@ -108,7 +108,7 @@ public class Main
 			.executor(new SetCommandExecutor())
 			.build();
 
-		game.getCommandDispatcher().register(this, setCommandSpec, "setcommand");
+		game.getCommandManager().register(this, setCommandSpec, "setcommand");
 
 		CommandSpec removeCommandSpec = CommandSpec.builder()
 			.description(Texts.of("Removes Command on CommandSign"))
@@ -117,7 +117,7 @@ public class Main
 			.executor(new RemoveCommandExecutor())
 			.build();
 
-		game.getCommandDispatcher().register(this, removeCommandSpec, "removecommand");
+		game.getCommandManager().register(this, removeCommandSpec, "removecommand");
 
 		getLogger().info("-----------------------------");
 		getLogger().info("CommandSigns was made by HassanS6000!");
@@ -292,7 +292,7 @@ public class Main
 						for (String command : commands)
 						{
 							command = command.replaceAll("@p", player.getName());
-							game.getCommandDispatcher().process(player, command);
+							game.getCommandManager().process(player, command);
 						}
 					}
 				}

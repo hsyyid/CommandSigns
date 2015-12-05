@@ -1,6 +1,6 @@
 package io.github.hsyyid.commandsigns.utils;
 
-import io.github.hsyyid.commandsigns.Main;
+import io.github.hsyyid.commandsigns.CommandSigns;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,7 +42,7 @@ public class Utils
                     " COMMAND     TEXT      NOT NULL)";
             stmt.executeUpdate(sql);
 
-            for(CommandSign commandSign : Main.commandSigns)
+            for(CommandSign commandSign : CommandSigns.commandSigns)
             {
                 double x = commandSign.getLocation().getX();
                 double y = commandSign.getLocation().getY();
@@ -87,7 +87,7 @@ public class Utils
                 String worldUUID = rs.getString("worldid");
                 String commandJSON = rs.getString("command");
                 ArrayList<String> commands = new ArrayList<String>(Arrays.asList(gson.fromJson(commandJSON, String[].class)));
-                World world = Main.game.getServer().getWorld(UUID.fromString(worldUUID)).get();
+                World world = CommandSigns.game.getServer().getWorld(UUID.fromString(worldUUID)).get();
                 Location<World> location = new Location<World>(world, x, y, z);
 
                 CommandSign commandSign = new CommandSign(location);
@@ -95,7 +95,7 @@ public class Utils
                 commandSigns.add(commandSign);
             }
 
-            Main.commandSigns = commandSigns;
+            CommandSigns.commandSigns = commandSigns;
             rs.close();
             stmt.close();
             c.close();
