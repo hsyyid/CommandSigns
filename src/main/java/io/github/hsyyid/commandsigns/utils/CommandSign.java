@@ -10,64 +10,87 @@ import org.spongepowered.api.world.World;
 
 public class CommandSign
 {
-    private Location<World> location;
-    private ArrayList<String> commands = new ArrayList<String>();
-    
-    public CommandSign(Location<World> location)
-    {
-        this.location = location;
-    }
+	private String users;
+	private Location<World> location;
+	private ArrayList<String> commands = new ArrayList<String>();
+	private boolean oneTime;
 
-    public void setLocation(Location<World> location)
-    {
-        this.location = location;
-    }
+	public CommandSign(Location<World> location, boolean oneTime)
+	{
+		this.location = location;
+		this.oneTime = oneTime;
+		this.users = "";
+	}
+	
+	public void setUsers(String users)
+	{
+		this.users = users;
+	}
+	
+	public void setOneTime(boolean oneTime)
+	{
+		this.oneTime = oneTime;
+	}
 
-    public void setCommands(ArrayList<String> commands)
-    {
-        this.commands = commands;
-    }
+	public void setLocation(Location<World> location)
+	{
+		this.location = location;
+	}
 
-    public void addCommand(String command)
-    {
-        this.commands.add(command);
-    }
+	public void setCommands(ArrayList<String> commands)
+	{
+		this.commands = commands;
+	}
 
-    public Text addCommand(String command, int commandNumber)
-    {
-        try
-        {
-            this.commands.set(commandNumber, command);
-            return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!");
-        }
-        catch(Exception e)
-        {
-            return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
-        }
-    }
-    
-    public Text removeCommand(int commandNumber)
-    {
-        try
-        {
-            this.commands.remove(commandNumber);
-            return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed command!");
-        }
-        catch(Exception e)
-        {
-            return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
-        }
-    }
+	public void addCommand(String command)
+	{
+		this.commands.add(command);
+	}
 
-    public Location<World> getLocation()
-    {
-        return location;
-    }
+	public Text addCommand(String command, int commandNumber)
+	{
+		try
+		{
+			this.commands.set(commandNumber, command);
+			return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!");
+		}
+		catch (Exception e)
+		{
+			return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
+		}
+	}
 
-    public ArrayList<String> getCommands()
-    {
-        return commands;
-    }
+	public Text removeCommand(int commandNumber)
+	{
+		try
+		{
+			this.commands.remove(commandNumber);
+			return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed command!");
+		}
+		catch (Exception e)
+		{
+			return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
+		}
+	}
+
+	public String getUsers()
+	{
+		return users;
+	}
+	
+	public boolean getOneTime()
+	{
+		return oneTime;
+	}
+
+	public Location<World> getLocation()
+	{
+		return location;
+	}
+
+	public ArrayList<String> getCommands()
+	{
+		return commands;
+	}
 
 }
-
