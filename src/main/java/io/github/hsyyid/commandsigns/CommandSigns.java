@@ -309,7 +309,7 @@ public class CommandSigns
 							for (String command : commands)
 							{
 								command = command.replaceAll("@p", player.getName());
-								game.getCommandManager().process(player, command);
+								game.getCommandManager().process(game.getServer().getConsole(), command);
 							}
 
 							if (targetCommandSign.getOneTime())
