@@ -49,7 +49,7 @@ public class DatabaseManager
                     " Z           DOUBLE    NOT NULL, " + 
                     " WORLDID     TEXT      NOT NULL, " + 
                     " COMMAND     TEXT      NOT NULL, " +
-                    " ONETIME     BOOLEAN   NOT NULL, " +
+                    " ONETIME     INTEGER   NOT NULL, " +
                     " USERS       TEXT      NOT NULL)";
             stmt.executeUpdate(sql);
 
@@ -58,7 +58,12 @@ public class DatabaseManager
                 double x = commandSign.getLocation().getX();
                 double y = commandSign.getLocation().getY();
                 double z = commandSign.getLocation().getZ();
-                boolean oneTime = commandSign.getOneTime();
+                boolean time = commandSign.getOneTime();
+                int oneTime = 0;
+                
+                if(time)
+                    oneTime = 1;
+                
                 String users = commandSign.getUsers();
 
                 String worldUUID = commandSign.getLocation().getExtent().getUniqueId().toString();
@@ -74,7 +79,8 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            ;
+            System.out.println("Error occured while saving CommandSigns:");
+            e.printStackTrace();
         }
     }
 
@@ -103,7 +109,12 @@ public class DatabaseManager
 
             while (rs.next())
             {
-            	boolean oneTime = rs.getBoolean("oneTime");
+            	int time = rs.getInt("oneTime");
+            	boolean oneTime = false;
+            	
+            	if(time == 1)
+            	    oneTime = true;
+            	
                 double x = rs.getDouble("x");
                 double y = rs.getDouble("y");
                 double z = rs.getDouble("z");
@@ -127,7 +138,8 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            ;
+            System.out.println("An unexpected error occured while reading CommandSigns:");
+            e.printStackTrace();
         }
     }
 }   
