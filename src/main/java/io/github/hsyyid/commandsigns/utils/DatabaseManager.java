@@ -44,7 +44,7 @@ public class DatabaseManager
             stmt.executeUpdate(sql);
 
             sql = "CREATE TABLE COMMANDSIGNS " +
-                    "(X DOUBLE PRIMARY KEY     NOT NULL," +
+                    "(X 		  DOUBLE    NOT NULL," +
                     " Y           DOUBLE    NOT NULL, " + 
                     " Z           DOUBLE    NOT NULL, " + 
                     " WORLDID     TEXT      NOT NULL, " + 
