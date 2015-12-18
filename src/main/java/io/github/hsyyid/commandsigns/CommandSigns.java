@@ -13,6 +13,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -70,7 +71,7 @@ public class CommandSigns
 	{
 		getLogger().info("CommandSigns loading...");
 
-		game = event.getGame();
+		game = Sponge.getGame();
 
 		// Config File
 		try
