@@ -1,12 +1,11 @@
 package io.github.hsyyid.commandsigns.utils;
 
-import java.util.ArrayList;
-
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+
+import java.util.ArrayList;
 
 public class CommandSign
 {
@@ -52,11 +51,11 @@ public class CommandSign
 		try
 		{
 			this.commands.set(commandNumber, command);
-			return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!");
+			return Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!");
 		}
 		catch (Exception e)
 		{
-			return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
+			return Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
 		}
 	}
 
@@ -65,11 +64,11 @@ public class CommandSign
 		try
 		{
 			this.commands.remove(commandNumber);
-			return Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed command!");
+			return Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed command!");
 		}
 		catch (Exception e)
 		{
-			return Texts.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
+			return Text.of(TextColors.DARK_RED, "Error! ", TextColors.RED, "The command number you specified is not present.");
 		}
 	}
 

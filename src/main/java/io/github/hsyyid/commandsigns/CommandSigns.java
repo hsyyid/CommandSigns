@@ -32,7 +32,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -93,10 +93,10 @@ public class CommandSigns
 
 		CommandSpec addCommandSpec = 
 			CommandSpec.builder()
-			.description(Texts.of("Adds Command to CommandSign"))
+			.description(Text.of("Adds Command to CommandSign"))
 			.permission("commandsigns.addcommand")
 			.arguments(GenericArguments.onlyOne(
-				GenericArguments.remainingJoinedStrings(Texts.of("command"))))
+				GenericArguments.remainingJoinedStrings(Text.of("command"))))
 			.executor(new AddCommandExecutor())
 			.build();
 
@@ -104,11 +104,11 @@ public class CommandSigns
 
 		CommandSpec setCommandSpec = 
 			CommandSpec.builder()
-			.description(Texts.of("Sets Command on CommandSign"))
+			.description(Text.of("Sets Command on CommandSign"))
 			.permission("commandsigns.setcommand")
 			.arguments(GenericArguments.seq(
-				GenericArguments.onlyOne(GenericArguments.integer(Texts.of("command number"))),
-				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Texts.of("command")))))
+				GenericArguments.onlyOne(GenericArguments.integer(Text.of("command number"))),
+				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
 			.executor(new SetCommandExecutor())
 			.build();
 
@@ -116,10 +116,10 @@ public class CommandSigns
 
 		CommandSpec removeCommandSpec = 
 			CommandSpec.builder()
-			.description(Texts.of("Removes Command on CommandSign"))
+			.description(Text.of("Removes Command on CommandSign"))
 			.permission("commandsigns.removecommand")
 			.arguments(GenericArguments.onlyOne(
-				GenericArguments.integer(Texts.of("command number"))))
+				GenericArguments.integer(Text.of("command number"))))
 			.executor(new RemoveCommandExecutor())
 			.build();
 
@@ -154,19 +154,19 @@ public class CommandSigns
 			Sign sign = event.getTargetTile();
 			Location<World> signLocation = sign.getLocation();
 			SignData signData = event.getText();
-			String line0 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(0));
-			String line1 = Texts.toPlain(signData.getValue(Keys.SIGN_LINES).get().get(1));
+			String line0 = signData.getValue(Keys.SIGN_LINES).get().get(0).toPlain();
+			String line1 = signData.getValue(Keys.SIGN_LINES).get().get(1).toPlain();
 
 			if (line0.equals("[CommandSign]"))
 			{
 				if (player.hasPermission("commandsigns.create"))
 				{
-					signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Texts.of(TextColors.DARK_BLUE, "[CommandSign]")));
-					player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
+					signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(0, Text.of(TextColors.DARK_BLUE, "[CommandSign]")));
+					player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully created a CommandSign!"));
 
 					if (line1.equalsIgnoreCase("onetime"))
 					{
-						signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(1, Texts.of(TextColors.GREEN, "One-time Use")));
+						signData = signData.set(signData.getValue(Keys.SIGN_LINES).get().set(1, Text.of(TextColors.GREEN, "One-time Use")));
 						commandSigns.add(new CommandSign(signLocation, true));
 					}
 					else
@@ -203,12 +203,12 @@ public class CommandSigns
 					if (player.hasPermission("commandsigns.destroy"))
 					{
 						commandSigns.remove(targetCommandSign);
-						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
+						player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully removed CommandSign!"));
 						DatabaseManager.writeCommandSigns();
 					}
 					else
 					{
-						player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
+						player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.DARK_RED, "Error! ", TextColors.RED, "You do not have permission to break CommandSigns!"));
 						event.setCancelled(true);
 						break;
 					}
@@ -263,7 +263,7 @@ public class CommandSigns
 							else
 							{
 								targetCommandSign.addCommand(targetCommand.getCommand());
-								player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
+								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
 							}
 
 							commandSigns.add(targetCommandSign);
@@ -291,7 +291,7 @@ public class CommandSigns
 					{
 						if (targetCommandSign.getOneTime() && targetCommandSign.getUsers().contains(player.getUniqueId().toString()))
 						{
-							player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! You have already used this sign."));
+							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! You have already used this sign."));
 							return;
 						}
 						else
@@ -300,11 +300,11 @@ public class CommandSigns
 
 							if (commands.size() > 0)
 							{
-								player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
+								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
 							}
 							else
 							{
-								player.sendMessage(Texts.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
+								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
 							}
 
 							for (String command : commands)
