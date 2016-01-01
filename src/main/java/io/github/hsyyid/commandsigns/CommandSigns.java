@@ -41,7 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.8")
+@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.9")
 public class CommandSigns
 {
 	public static Game game = null;
