@@ -79,7 +79,7 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            System.out.println("Error occured while saving CommandSigns:");
+            System.out.println("An unexpected error occured while saving CommandSigns:");
             e.printStackTrace();
         }
     }
@@ -138,8 +138,8 @@ public class DatabaseManager
         }
         catch (Exception e)
         {
-            System.out.println("An unexpected error occured while reading CommandSigns:");
-            e.printStackTrace();
+            System.out.println("An unexpected error occured while reading CommandSigns. "
+            	+ "If this is the first time you're seeing this it is normal.");
         }
     }
 }   
