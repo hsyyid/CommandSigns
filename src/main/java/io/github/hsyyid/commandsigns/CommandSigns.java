@@ -1,6 +1,7 @@
 package io.github.hsyyid.commandsigns;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import io.github.hsyyid.commandsigns.cmdexecutors.AddCommandExecutor;
 import io.github.hsyyid.commandsigns.cmdexecutors.RemoveCommandExecutor;
@@ -28,6 +29,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
@@ -41,14 +43,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-@Plugin(id = "CommandSigns", name = "CommandSigns", version = "0.9")
+@Plugin(id = "io.github.hsyyid.commandsigns", name = "CommandSigns", version = "1.0", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
 public class CommandSigns
 {
+
 	public static Game game = null;
 	public static ConfigurationNode config = null;
 	public static ConfigurationLoader<CommentedConfigurationNode> configurationManager;
-	public static ArrayList<CommandSign> commandSigns = new ArrayList<CommandSign>();
-	public static ArrayList<Command> commands = new ArrayList<Command>();
+	public static ArrayList<CommandSign> commandSigns = Lists.newArrayList();
+	public static ArrayList<Command> commands = Lists.newArrayList();
 
 	@Inject
 	private Logger logger;
@@ -91,35 +94,28 @@ public class CommandSigns
 			getLogger().error("The default configuration could not be loaded or created!");
 		}
 
-		CommandSpec addCommandSpec = 
-			CommandSpec.builder()
+		CommandSpec addCommandSpec = CommandSpec.builder()
 			.description(Text.of("Adds Command to CommandSign"))
 			.permission("commandsigns.addcommand")
-			.arguments(GenericArguments.onlyOne(
-				GenericArguments.remainingJoinedStrings(Text.of("command"))))
+			.arguments(GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command"))))
 			.executor(new AddCommandExecutor())
 			.build();
 
 		game.getCommandManager().register(this, addCommandSpec, "addcommand");
 
-		CommandSpec setCommandSpec = 
-			CommandSpec.builder()
+		CommandSpec setCommandSpec = CommandSpec.builder()
 			.description(Text.of("Sets Command on CommandSign"))
 			.permission("commandsigns.setcommand")
-			.arguments(GenericArguments.seq(
-				GenericArguments.onlyOne(GenericArguments.integer(Text.of("command number"))),
-				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
+			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.integer(Text.of("command number"))), GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
 			.executor(new SetCommandExecutor())
 			.build();
 
 		game.getCommandManager().register(this, setCommandSpec, "setcommand");
 
-		CommandSpec removeCommandSpec = 
-			CommandSpec.builder()
+		CommandSpec removeCommandSpec = CommandSpec.builder()
 			.description(Text.of("Removes Command on CommandSign"))
 			.permission("commandsigns.removecommand")
-			.arguments(GenericArguments.onlyOne(
-				GenericArguments.integer(Text.of("command number"))))
+			.arguments(GenericArguments.onlyOne(GenericArguments.integer(Text.of("command number"))))
 			.executor(new RemoveCommandExecutor())
 			.build();
 
@@ -191,7 +187,8 @@ public class CommandSigns
 
 				for (CommandSign cmdSign : commandSigns)
 				{
-					if (cmdSign.getLocation().getX() == transaction.getFinal().getLocation().get().getX() && cmdSign.getLocation().getY() == transaction.getFinal().getLocation().get().getY() && cmdSign.getLocation().getZ() == transaction.getFinal().getLocation().get().getZ() && cmdSign.getLocation().getExtent().getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
+					if (cmdSign.getLocation().getX() == transaction.getFinal().getLocation().get().getX() && cmdSign.getLocation().getY() == transaction.getFinal().getLocation().get().getY() && cmdSign.getLocation().getZ() == transaction.getFinal().getLocation().get().getZ() && cmdSign.getLocation().getExtent()
+						.getUniqueId().toString().equals(cmdSign.getLocation().getExtent().getUniqueId().toString()))
 					{
 						targetCommandSign = cmdSign;
 						break;
@@ -218,104 +215,107 @@ public class CommandSigns
 	}
 
 	@Listener
-	public void onPlayerInteractBlock(InteractBlockEvent event)
+	public void onPlayerInteractBlock(InteractBlockEvent event, @First Player player)
 	{
-		if (event.getCause().first(Player.class).isPresent())
+		if (event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
 		{
-			Player player = (Player) event.getCause().first(Player.class).get();
+			CommandSign targetCommandSign = null;
 
-			if (event.getTargetBlock().getState().getType().equals(BlockTypes.WALL_SIGN) || event.getTargetBlock().getState().getType().equals(BlockTypes.STANDING_SIGN))
+			for (CommandSign cmdSign : commandSigns)
 			{
-				CommandSign targetCommandSign = null;
-
-				for (CommandSign cmdSign : commandSigns)
+				if (cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ() && cmdSign.getLocation().getExtent().getUniqueId().toString()
+					.equals(event.getTargetBlock().getLocation().get().getExtent().getUniqueId().toString()))
 				{
-					if (cmdSign.getLocation().getX() == event.getTargetBlock().getLocation().get().getX() && cmdSign.getLocation().getY() == event.getTargetBlock().getLocation().get().getY() && cmdSign.getLocation().getZ() == event.getTargetBlock().getLocation().get().getZ() && cmdSign.getLocation().getExtent().getUniqueId().toString().equals(event.getTargetBlock().getLocation().get().getExtent().getUniqueId().toString()))
-					{
-						targetCommandSign = cmdSign;
-						break;
-					}
+					targetCommandSign = cmdSign;
+					break;
 				}
+			}
 
-				if (targetCommandSign != null)
+			if (targetCommandSign != null)
+			{
+				if (player.hasPermission("commandsigns.modify"))
 				{
-					if (player.hasPermission("commandsigns.modify"))
+					Command targetCommand = null;
+
+					for (Command command : commands)
 					{
-						Command targetCommand = null;
-
-						for (Command command : commands)
+						if (command.getPlayerUUID().equals(player.getUniqueId()))
 						{
-							if (command.getPlayerUUID().equals(player.getUniqueId()))
-							{
-								targetCommand = command;
-								break;
-							}
-						}
-
-						if (targetCommand != null && targetCommand.getCommand() != null && !(targetCommand.getToRemove()))
-						{
-							commandSigns.remove(targetCommandSign);
-
-							if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
-							{
-								player.sendMessage(targetCommandSign.addCommand(targetCommand.getCommand(), targetCommand.getCommandNumber().get() - 1));
-							}
-							else
-							{
-								targetCommandSign.addCommand(targetCommand.getCommand());
-								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
-							}
-
-							commandSigns.add(targetCommandSign);
-							commands.remove(targetCommand);
-
-							DatabaseManager.writeCommandSigns();
-						}
-						else if (targetCommand != null && targetCommand.getToRemove())
-						{
-							commandSigns.remove(targetCommandSign);
-
-							if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
-							{
-								player.sendMessage(targetCommandSign.removeCommand(targetCommand.getCommandNumber().get() - 1));
-							}
-
-							commandSigns.add(targetCommandSign);
-							commands.remove(targetCommand);
-
-							DatabaseManager.writeCommandSigns();
+							targetCommand = command;
+							break;
 						}
 					}
 
-					if (player.hasPermission("commandsigns.use"))
+					if (targetCommand != null && targetCommand.getCommand() != null && !(targetCommand.getToRemove()))
 					{
-						if (targetCommandSign.getOneTime() && targetCommandSign.getUsers().contains(player.getUniqueId().toString()))
+						commandSigns.remove(targetCommandSign);
+
+						if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
 						{
-							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! You have already used this sign."));
-							return;
+							player.sendMessage(targetCommandSign.addCommand(targetCommand.getCommand(), targetCommand.getCommandNumber().get() - 1));
 						}
 						else
 						{
-							ArrayList<String> commands = targetCommandSign.getCommands();
+							targetCommandSign.addCommand(targetCommand.getCommand());
+							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Successfully set new command!"));
+						}
 
-							if (commands.size() > 0)
-							{
-								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
-							}
-							else
-							{
-								player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
-							}
+						commandSigns.add(targetCommandSign);
+						commands.remove(targetCommand);
 
-							for (String command : commands)
+						DatabaseManager.writeCommandSigns();
+					}
+					else if (targetCommand != null && targetCommand.getToRemove())
+					{
+						commandSigns.remove(targetCommandSign);
+
+						if (targetCommand.getCommandNumber().isPresent() && targetCommand.getCommandNumber() != Optional.<Integer> absent())
+						{
+							player.sendMessage(targetCommandSign.removeCommand(targetCommand.getCommandNumber().get() - 1));
+						}
+
+						commandSigns.add(targetCommandSign);
+						commands.remove(targetCommand);
+
+						DatabaseManager.writeCommandSigns();
+					}
+				}
+
+				if (player.hasPermission("commandsigns.use"))
+				{
+					if (targetCommandSign.getOneTime() && targetCommandSign.getUsers().contains(player.getUniqueId().toString()))
+					{
+						player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! You have already used this sign."));
+						return;
+					}
+					else
+					{
+						ArrayList<String> commands = targetCommandSign.getCommands();
+
+						if (commands.size() > 0)
+						{
+							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Success! Executing commands."));
+						}
+						else
+						{
+							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "Error! No commands set on this CommandSign."));
+						}
+
+						for (String command : commands)
+						{
+							if (command.contains("@p"))
 							{
 								command = command.replaceAll("@p", player.getName());
 								game.getCommandManager().process(game.getServer().getConsole(), command);
 							}
-
-							if (targetCommandSign.getOneTime())
-								targetCommandSign.setUsers(targetCommandSign.getUsers() + ", " + player.getUniqueId().toString());
+							else
+							{
+								game.getCommandManager().process(player, command);
+							}
 						}
+
+						if (targetCommandSign.getOneTime())
+							targetCommandSign.setUsers(targetCommandSign.getUsers() + ", " + player.getUniqueId().toString());
 					}
 				}
 			}
