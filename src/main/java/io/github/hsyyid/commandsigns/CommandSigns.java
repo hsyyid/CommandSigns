@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.commandsigns", name = "CommandSigns", version = "1.2", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
+@Plugin(id = "io.github.hsyyid.commandsigns", name = "CommandSigns", version = "1.3", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
 public class CommandSigns
 {
 	public static List<CommandSignModifier> commandSignModifiers = Lists.newArrayList();
