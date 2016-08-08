@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@Plugin(id = "io.github.hsyyid.commandsigns", name = "CommandSigns", version = "1.2", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
+@Plugin(id = "io.github.hsyyid.commandsigns", name = "CommandSigns", version = "1.3", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
 public class CommandSigns
 {
 	public static List<CommandSignModifier> commandSignModifiers = Lists.newArrayList();
@@ -93,7 +93,9 @@ public class CommandSigns
 		subcommands.put(Arrays.asList("setcommandsign"), CommandSpec.builder()
 			.description(Text.of("Creates CommandSigns"))
 			.permission("commandsigns.setcommandsign")
-			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.bool(Text.of("one time"))), GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
+			.arguments(GenericArguments.seq(
+				GenericArguments.onlyOne(GenericArguments.bool(Text.of("one time"))), 
+				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
 			.executor(new SetCommandSignExecutor())
 			.build());
 
