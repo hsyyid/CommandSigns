@@ -99,6 +99,12 @@ public class InteractBlockListener
 						boolean isOneTime = tile.get(IsOneTimeData.class).get().isOneTime().get();
 						String users = tile.getOrCreate(UsersData.class).get().users().get();
 
+						if (isOneTime && users.contains(player.getUniqueId().toString()))
+						{
+							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.RED, "You have already used this sign."));
+							return;
+						}
+
 						if (commands.size() > 0)
 						{
 							player.sendMessage(Text.of(TextColors.GOLD, "[CommandSigns]: ", TextColors.GRAY, "Executing commands."));

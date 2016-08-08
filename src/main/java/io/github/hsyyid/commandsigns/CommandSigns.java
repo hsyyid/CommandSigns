@@ -93,7 +93,9 @@ public class CommandSigns
 		subcommands.put(Arrays.asList("setcommandsign"), CommandSpec.builder()
 			.description(Text.of("Creates CommandSigns"))
 			.permission("commandsigns.setcommandsign")
-			.arguments(GenericArguments.seq(GenericArguments.onlyOne(GenericArguments.bool(Text.of("one time"))), GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
+			.arguments(GenericArguments.seq(
+				GenericArguments.onlyOne(GenericArguments.bool(Text.of("one time"))), 
+				GenericArguments.onlyOne(GenericArguments.remainingJoinedStrings(Text.of("command")))))
 			.executor(new SetCommandSignExecutor())
 			.build());
 
