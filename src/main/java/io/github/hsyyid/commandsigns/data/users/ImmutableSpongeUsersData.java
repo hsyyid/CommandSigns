@@ -43,14 +43,6 @@ public class ImmutableSpongeUsersData extends AbstractImmutableSingleData<String
 	}
 
 	@Override
-	public int compareTo(ImmutableUsersData o)
-	{
-		return ComparisonChain.start()
-			.compare(users().get(), o.users().get())
-			.result();
-	}
-
-	@Override
 	public <E> Optional<ImmutableUsersData> with(Key<? extends BaseValue<E>> key, E value)
 	{
 		if (this.supports(key))
