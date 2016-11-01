@@ -38,14 +38,6 @@ public class ImmutableSpongeCommandsData extends AbstractImmutableListData<Strin
 	}
 
 	@Override
-	public int compareTo(ImmutableCommandsData o)
-	{
-		return ComparisonChain.start()
-			.compare(commands().size(), o.commands().size())
-			.result();
-	}
-
-	@Override
 	public <E> Optional<ImmutableCommandsData> with(Key<? extends BaseValue<E>> key, E value)
 	{
 		if (this.supports(key))

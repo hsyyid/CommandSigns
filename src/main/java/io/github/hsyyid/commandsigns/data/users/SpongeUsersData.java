@@ -78,12 +78,4 @@ public class SpongeUsersData extends AbstractSingleData<String, UsersData, Immut
 	{
 		return users();
 	}
-
-	@Override
-	public int compareTo(UsersData o)
-	{
-		return ComparisonChain.start()
-			.compare(this.users().get(), o.users().get())
-			.result();
-	}
 }

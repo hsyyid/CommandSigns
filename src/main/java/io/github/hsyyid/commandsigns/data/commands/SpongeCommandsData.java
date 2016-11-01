@@ -79,12 +79,4 @@ public class SpongeCommandsData extends AbstractListData<String, CommandsData, I
 	{
 		return commands();
 	}
-
-	@Override
-	public int compareTo(CommandsData o)
-	{
-		return ComparisonChain.start()
-			.compare(this.commands().size(), o.commands().size())
-			.result();
-	}
 }
