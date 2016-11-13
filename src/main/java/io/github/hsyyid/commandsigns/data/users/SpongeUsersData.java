@@ -1,8 +1,7 @@
 package io.github.hsyyid.commandsigns.data.users;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ComparisonChain;
-import io.github.hsyyid.commandsigns.CommandSigns;
+import java.util.Optional;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -11,7 +10,9 @@ import org.spongepowered.api.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.mutable.Value;
 
-import java.util.Optional;
+import com.google.common.base.Preconditions;
+
+import io.github.hsyyid.commandsigns.CommandSigns;
 
 public class SpongeUsersData extends AbstractSingleData<String, UsersData, ImmutableUsersData> implements UsersData
 {
@@ -77,13 +78,5 @@ public class SpongeUsersData extends AbstractSingleData<String, UsersData, Immut
 	protected Value<?> getValueGetter()
 	{
 		return users();
-	}
-
-	@Override
-	public int compareTo(UsersData o)
-	{
-		return ComparisonChain.start()
-			.compare(this.users().get(), o.users().get())
-			.result();
 	}
 }

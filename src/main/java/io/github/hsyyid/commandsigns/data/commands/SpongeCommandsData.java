@@ -1,9 +1,8 @@
 package io.github.hsyyid.commandsigns.data.commands;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Lists;
-import io.github.hsyyid.commandsigns.CommandSigns;
+import java.util.List;
+import java.util.Optional;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -11,8 +10,10 @@ import org.spongepowered.api.data.manipulator.mutable.common.AbstractListData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.mutable.ListValue;
 
-import java.util.List;
-import java.util.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
+import io.github.hsyyid.commandsigns.CommandSigns;
 
 public class SpongeCommandsData extends AbstractListData<String, CommandsData, ImmutableCommandsData> implements CommandsData
 {
@@ -39,6 +40,7 @@ public class SpongeCommandsData extends AbstractListData<String, CommandsData, I
 		return super.toContainer().set(CommandSigns.COMMANDS.getQuery(), this.getValue());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Optional<CommandsData> from(DataContainer container)
 	{
@@ -78,13 +80,5 @@ public class SpongeCommandsData extends AbstractListData<String, CommandsData, I
 	protected ListValue<String> getValueGetter()
 	{
 		return commands();
-	}
-
-	@Override
-	public int compareTo(CommandsData o)
-	{
-		return ComparisonChain.start()
-			.compare(this.commands().size(), o.commands().size())
-			.result();
 	}
 }
