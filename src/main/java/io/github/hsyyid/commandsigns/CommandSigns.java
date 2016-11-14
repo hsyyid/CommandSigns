@@ -1,8 +1,32 @@
 package io.github.hsyyid.commandsigns;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.key.KeyFactory;
+import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+
 import io.github.hsyyid.commandsigns.cmdexecutors.AddCommandExecutor;
 import io.github.hsyyid.commandsigns.cmdexecutors.CommandSignsExecutor;
 import io.github.hsyyid.commandsigns.cmdexecutors.ListCommandsExecutor;
@@ -33,27 +57,6 @@ import io.github.hsyyid.commandsigns.listeners.InteractBlockListener;
 import io.github.hsyyid.commandsigns.utils.CommandSignModifier;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.slf4j.Logger;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.KeyFactory;
-import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.text.Text;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @Plugin(id = "commandsigns", name = "CommandSigns", version = "1.3.1", description = "This plugins enables server admins to create signs that run a list of commands, targeting the player who clicks them.")
 public class CommandSigns
@@ -62,11 +65,15 @@ public class CommandSigns
 	public static Set<UUID> listCommands = Sets.newHashSet();
 
 	// Keys
-	public static final Key<Value<Boolean>> IS_COMMAND_SIGN = KeyFactory.makeSingleKey(Boolean.class, Value.class, DataQuery.of("IsCommandSign"));
-	public static final Key<Value<Boolean>> IS_ONE_TIME = KeyFactory.makeSingleKey(Boolean.class, Value.class, DataQuery.of("IsOneTime"));
-	public static final Key<Value<String>> USERS = KeyFactory.makeSingleKey(String.class, Value.class, DataQuery.of("Users"));
-	public static final Key<ListValue<String>> COMMANDS = KeyFactory.makeListKey(String.class, DataQuery.of("Commands"));
-
+	@SuppressWarnings("serial")
+	public static final Key<Value<Boolean>> IS_COMMAND_SIGN = KeyFactory.makeSingleKey(new TypeToken<Boolean>() {} , new TypeToken<Value<Boolean>>() {}, DataQuery.of("IsCommandSign"), "commandsigns:is_command_sign", "Whether a sign is a CommandSign");
+	@SuppressWarnings("serial")
+	public static final Key<Value<Boolean>> IS_ONE_TIME = KeyFactory.makeSingleKey(new TypeToken<Boolean>() {} , new TypeToken<Value<Boolean>>() {}, DataQuery.of("IsOneTime"), "commandsigns:is_one_time", "Whether a CommandSign is one time only");
+	@SuppressWarnings("serial")
+	public static final Key<Value<String>> USERS = KeyFactory.makeSingleKey(new TypeToken<String>() {} , new TypeToken<Value<String>>() {}, DataQuery.of("Users"), "commandsigns:users", "Get the users that used a CommandSign");
+	@SuppressWarnings("serial")
+	public static final Key<ListValue<String>> COMMANDS = KeyFactory.makeListKey(new TypeToken<List<String>>() {}, new TypeToken<ListValue<String>>() {}, DataQuery.of("Commands"), "commandsigns:commands", "Get the commands of a CommandSign");
+	
 	@Inject
 	private Logger logger;
 

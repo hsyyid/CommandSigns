@@ -1,7 +1,7 @@
 package io.github.hsyyid.commandsigns.data.users;
 
-import com.google.common.collect.ComparisonChain;
-import io.github.hsyyid.commandsigns.CommandSigns;
+import java.util.Optional;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
@@ -9,7 +9,7 @@ import org.spongepowered.api.data.manipulator.immutable.common.AbstractImmutable
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 
-import java.util.Optional;
+import io.github.hsyyid.commandsigns.CommandSigns;
 
 public class ImmutableSpongeUsersData extends AbstractImmutableSingleData<String, ImmutableUsersData, UsersData> implements ImmutableUsersData
 {
@@ -40,14 +40,6 @@ public class ImmutableSpongeUsersData extends AbstractImmutableSingleData<String
 	public ImmutableValue<String> users()
 	{
 		return Sponge.getRegistry().getValueFactory().createValue(CommandSigns.USERS, this.getValue()).asImmutable();
-	}
-
-	@Override
-	public int compareTo(ImmutableUsersData o)
-	{
-		return ComparisonChain.start()
-			.compare(users().get(), o.users().get())
-			.result();
 	}
 
 	@Override
